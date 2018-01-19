@@ -1,17 +1,15 @@
-{
-    "name": "shashankshotri/customer-support",
-    "authors": [
-        {
-            "name": "shashank",
-            "email": "shashank.shroti@infobeans.com"
-        }
-    ],
-    "require": {},
-    "require-dev": {
-        "bjornjohansen/wp-pre-commit-hook": "^0.2.1",
-	"phpmd/phpmd" : "@stable"
-    },
-"autoload": {
+"repositories": [
+    {
+        "type": "package",
+        "package": {
+            "name": "Wordpress/Coding Standard",
+            "version": "dev-master",
+            "source": {
+                "url": "https://github.com/shashank-infobeans/wp-ruleset.git",
+                "type": "git",
+                "reference": "master"
+            },
+            "autoload": {
         "psr-4": {
             "CustomHook\\PreCommitHook\\": "hook-install/"
         }
@@ -24,4 +22,6 @@
             "CustomHook\\PreCommitHook\\Hook::run"
         ]
     }
-}
+        }
+    }
+]
