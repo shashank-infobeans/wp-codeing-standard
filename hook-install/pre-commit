@@ -1,0 +1,73 @@
+#!/bin/bash
+
+PROJECT=`php -r "echo dirname(dirname(dirname(realpath('$0'))));"`
+STAGED_FILES_CMD=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
+
+# Download rule engine files
+wget -O $PROJECT/phpcs.ruleset.xml http://172.16.2.115/phpcs.ruleset.xml
+wget -O $PROJECT/phpmd.ruleset.xml http://172.16.2.115/phpmd.ruleset.xml
+
+# Determine if a file list is passed
+if [ "$#" -eq 1 ]
+then
+    oIFS=$IFS
+    IFS='
+    '
+    SFILES="$1"
+    IFS=$oIFS
+fi
+SFILES=${SFILES:-$STAGED_FILES_CMD}
+
+echo "$(tput setaf 2)Checking PHP Lint...$(tput sgr0)"
+for FILE in $SFILES
+do
+    php -l -d display_errors=0 "$PROJECT/$FILE"
+    if [ $? != 0 ]
+    then
+	echo " $(tput setaf 1)Fix the error before commit.$(tput sgr0)"        
+        exit 1
+    fi
+    FILES="$FILES \"$PROJECT/$FILE\""
+done
+
+MDRULESET="phpmd.ruleset.xml"
+#echo " $(tput setaf 1)Text$(tput sgr0) "
+echo "$(tput setaf 2)Checking PHP mess detector, using $MDRULESET as ruleset standard...$(tput sgr0)"
+for FILE in $SFILES
+do
+    ./vendor/bin/phpmd  "$PROJECT/$FILE" text codesize,"$MDRULESET"    
+    if [ $? != 0 ]
+    then
+        #echo "Fix the error before commit."
+	echo " $(tput setaf 1)Fix the error before commit.$(tput sgr0)"        
+        exit 1
+    else
+	echo "No mess detector error detected in $PROJECT/$FILE"        
+    fi
+
+done
+
+if [ -f "$PROJECT/phpcs.ruleset.xml" ]
+then
+    RULESET="$PROJECT/phpcs.ruleset.xml,WordPress"
+else
+    RULESET="WordPress"
+fi
+
+echo "$(tput setaf 2)Checking Code Standard Compliance, using $RULESET as ruleset standard...$(tput sgr0)"
+for FILE in $SFILES
+do
+    ./vendor/bin/phpcs --standard="$RULESET" --colors --encoding=utf-8 -n -p "$PROJECT/$FILE"
+    if [ $? != 0 ]
+    then
+        echo " $(tput setaf 1)Fix the error before commit.$(tput sgr0)"        
+        echo "Run"
+        echo "  ./vendor/bin/phpcbf --standard=\"$RULESET\" $FILES"
+        echo "for automatic fix or fix it manually."
+        exit 1
+       else
+	echo "No code standard compliance error detected in $PROJECT/$FILE"        
+    fi
+done
+
+exit $?

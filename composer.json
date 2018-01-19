@@ -1,0 +1,27 @@
+{
+    "name": "shashankshotri/customer-support",
+    "authors": [
+        {
+            "name": "shashank",
+            "email": "shashank.shroti@infobeans.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "bjornjohansen/wp-pre-commit-hook": "^0.2.1",
+	"phpmd/phpmd" : "@stable"
+    },
+"autoload": {
+        "psr-4": {
+            "CustomHook\\PreCommitHook\\": "hook-install/"
+        }
+    },
+    "extra": {
+        "class": "CustomHook\\PreCommitHook\\Hook"
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "CustomHook\\PreCommitHook\\Hook::run"
+        ]
+    }
+}
