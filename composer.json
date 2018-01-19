@@ -2,7 +2,7 @@
     {
         "type": "package",
         "package": {
-            "name": "Wordpress/Coding Standard",
+            "name": "Wordpress/Coding-Standard",
             "version": "dev-master",
             "source": {
                 "url": "https://github.com/shashank-infobeans/wp-ruleset.git",
